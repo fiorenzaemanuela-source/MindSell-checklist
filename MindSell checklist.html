@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MINDSELL – Checklist Interattiva (Analisi + Pulizia Linguistica)</title>
+  <style>
+    :root{
+      --bg:#070a12;
+      --panel:#0e1430;
+      --panel2:#0b1024;
+      --stroke:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.65);
+      --muted2:rgba(255,255,255,.50);
+      --good:#33d1a0;
+      --warn:#f6c453;
+      --bad:#ff5b7d;
+      --accent:#8b5cf6;
+      --accent2:#22c55e;
+      --shadow:0 14px 50px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(139,92,246,.22), transparent 55%),
+                  radial-gradient(900px 600px at 80% 20%, rgba(34,197,94,.12), transparent 60%),
+                  radial-gradient(900px 600px at 70% 80%, rgba(255,91,125,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      padding:22px;
+    }
+    .wrap{max-width:1100px;margin:0 auto}
+    .topbar{
+      display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 12px;border:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:999px;
+      box-shadow:var(--shadow);
+    }
+    .brand b{letter-spacing:.3px}
+    .pill{
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--stroke);
+      padding:6px 10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
+    }
+    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr;}}
+    .card{
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0;padding:14px 16px;font-size:15px;
+      display:flex;align-items:center;gap:10px;
+      border-bottom:1px solid var(--stroke);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .card .body{padding:14px 16px}
+    textarea{
+      width:100%;
+      min-height:130px;
+      resize:vertical;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.20));
+      color:var(--text);
+      padding:14px;
+      font-size:15px;
+      outline:none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+    }
+    textarea:focus{border-color:rgba(139,92,246,.55); box-shadow: inset 0 0 0 1px rgba(139,92,246,.25);}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+    button{
+      border:0;
+      border-radius:999px;
+      padding:11px 14px;
+      font-weight:650;
+      color:rgba(255,255,255,.95);
+      background:linear-gradient(180deg, rgba(139,92,246,.95), rgba(139,92,246,.70));
+      cursor:pointer;
+      box-shadow: 0 10px 28px rgba(139,92,246,.20);
+    }
+    button.secondary{
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+      color:rgba(255,255,255,.88);
+      font-weight:600;
+    }
+    button.ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.80);
+      box-shadow:none;
+      font-weight:600;
+    }
+    .meta{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .meta span{font-size:12px;color:var(--muted);border:1px solid var(--stroke);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.03)}
+    .hint{
+      margin-top:14px;
+      border:1px dashed rgba(139,92,246,.45);
+      background:rgba(139,92,246,.09);
+      border-radius:14px;
+      padding:12px 14px;
+    }
+    .hint .muted{color:var(--muted);font-size:12px;margin-bottom:6px}
+    .muted{color:var(--muted)}
+    .muted2{color:var(--muted2)}
+    .resultTop{
+      display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .scoreBig{font-size:54px;line-height:1;font-weight:850}
+    .scoreMeta{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      color:rgba(255,255,255,.9);
+      font-size:12px;font-weight:700;
+      width:max-content;
+    }
+    .badge.good{border-color:rgba(51,209,160,.35); background:rgba(51,209,160,.10); color:rgba(51,209,160,.95)}
+    .badge.warn{border-color:rgba(246,196,83,.35); background:rgba(246,196,83,.10); color:rgba(246,196,83,.95)}
+    .badge.bad{border-color:rgba(255,91,125,.35); background:rgba(255,91,125,.10); color:rgba(255,91,125,.95)}
+    .bar{
+      height:10px;border-radius:999px;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+      margin:10px 0 16px;
+    }
+    .bar > div{height:100%;width:0%;background:linear-gradient(90deg, var(--bad), var(--warn), var(--good));}
+    .section{
+      border:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border-radius:14px;
+      padding:12px 12px;
+      margin-top:10px;
+    }
+    .sectionHead{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;
+    }
+    .sectionHead b{font-size:13px}
+    .chip{
+      font-size:12px;font-weight:800;
+      padding:4px 9px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:rgba(255,255,255,.9);
+    }
+    ul{margin:8px 0 0 18px;color:rgba(255,255,255,.82)}
+    li{margin:6px 0;font-size:13px}
+    .divider{height:1px;background:rgba(255,255,255,.10);margin:12px 0}
+    .out{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      background:rgba(0,0,0,.22);
+      padding:12px 12px;
+      white-space:pre-wrap;
+      font-size:14px;
+      line-height:1.35;
+    }
+    .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .kpi{
+      font-size:12px;color:rgba(255,255,255,.86);
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+      padding:6px 10px;border-radius:999px;
+    }
+    .footerNote{
+      margin-top:10px;font-size:12px;color:var(--muted);
+    }
+    .smallLink{
+      cursor:pointer;
+      text-decoration:underline;
+      text-decoration-color:rgba(255,255,255,.25);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <span>🧠</span>
+        <div>
+          <b>MINDSELL</b>
+          <div class="muted2" style="font-size:12px">Checklist interattiva: Analisi + Pulizia linguistica</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span class="pill">Formula: Target • Novità • Semplicità • Valore</span>
+        <span class="pill">+ Linguaggio: Negative → Positive (conservativo)</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="card">
+        <h2>✍️ La tua frase</h2>
+        <div class="body">
+          <div class="muted2" style="font-size:13px;margin-bottom:8px">Scrivi qui (una sola frase). Poi clicca <b>Analizza</b>.</div>
+          <textarea id="phrase" placeholder="Esempio: Vediamo se questo è il percorso più adatto a te"></textarea>
+
+          <div class="row">
+            <button id="analyzeBtn">Analizza Frase</button>
+            <button class="secondary" id="exampleBtn">Carica esempio</button>
+            <button class="ghost" id="clearBtn">Svuota</button>
+
+            <div class="meta">
+              <span id="wordsPill">Parole: 0</span>
+              <span id="charsPill">Caratteri: 0</span>
+            </div>
+          </div>
+
+          <div class="hint">
+            <div class="muted">Suggerimento (conservativo):</div>
+            <div id="brutalHint"><b>Non invento concetti.</b> Ripulisco e riformulo solo ciò che hai scritto.</div>
+          </div>
+
+          <div class="footerNote">
+            Funziona offline. Nessun dato viene inviato online.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="card">
+        <h2>📊 Risultato</h2>
+        <div class="body">
+          <div class="resultTop">
+            <div class="scoreBig" id="totalScore">–</div>
+            <div class="scoreMeta">
+              <div class="muted2" style="font-size:13px;margin-top:6px">su 8 punti</div>
+              <div id="levelBadge" class="badge">Inserisci una frase</div>
+            </div>
+          </div>
+
+          <div class="bar"><div id="scoreBar"></div></div>
+
+          <div id="sections"></div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <div class="sectionHead">
+              <b>🧼 Pulizia Linguistica MindSell</b>
+              <span class="chip" id="langChip">—</span>
+            </div>
+            <div class="muted2" style="font-size:13px">
+              Qui non “creo” frasi: <b>sostituisco solo parole negative con alternative positive</b> ammesse.
+            </div>
+
+            <div class="kpiRow" id="langKpis"></div>
+
+            <div class="divider"></div>
+
+            <div style="display:grid;grid-template-columns:1fr;gap:10px">
+              <div>
+                <div class="muted" style="font-size:12px;margin-bottom:6px">🔴 Parole a frizione trovate</div>
+                <div class="out" id="negFound">—</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:12px;margin-bottom:6px">🟢 Sostituzioni consigliate (MindSell)</div>
+                <div class="out" id="replacements">—</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:12px;margin-bottom:6px">✍️ Versione riformulata (senza aggiunte)</div>
+                <div class="out" id="rewritten">—</div>
+                <div class="kpiRow" style="margin-top:10px">
+                  <button class="secondary" id="copyBtn">Copia versione riformulata</button>
+                  <span class="muted2 smallLink" id="whyLink" style="align-self:center">Perché queste sostituzioni?</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="footerNote" id="whyBox" style="display:none;margin-top:12px">
+              Regola: niente concetti nuovi. Solo sostituzioni “negative → positive” per ridurre attrito, aumentare controllo e mantenere frame conversazionale.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   0) Utilities
+========================================================= */
+function normalizeText(s){
+  return (s || "")
+    .toLowerCase()
+    .replace(/[’']/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function wordCountOf(s){
+  const t = normalizeText(s);
+  if(!t) return 0;
+  return t.split(" ").filter(Boolean).length;
+}
+
+function charCountOf(s){
+  return (s || "").length;
+}
+
+function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function setPills(){
+  const s = document.getElementById("phrase").value;
+  document.getElementById("wordsPill").textContent = `Parole: ${wordCountOf(s)}`;
+  document.getElementById("charsPill").textContent = `Caratteri: ${charCountOf(s)}`;
+}
+
+/* =========================================================
+   1) MINDSELL – Scoring (0–2)
+   IMPORTANT: conservativo (non inventa). Valuta ciò che c'è.
+========================================================= */
+
+// Heuristics for Target/Rilevanza:
+const TARGET_TRIGGERS = [
+  "per te", "per chi", "se sei", "se sei un", "se sei una",
+  "per chi vuole", "per chi cerca", "per chi ha", "per chi deve",
+  "tu che", "a te", "per voi", "per lei", "per lei che", "per lei se"
+];
+
+// Heuristics for Novità/Differenziazione (solo segnali linguistici, NON aggiunge nulla):
+const NOVELTY_TRIGGERS = [
+  "unico", "prima", "primo", "esclusivo", "mai visto",
+  "senza", "invece", "diverso", "alternativa", "nuovo", "nuova"
+];
+
+// Heuristics for Valore (beneficio/risultato, misurabile):
+const VALUE_VERBS = [
+  "aumenta","riduce","risparmia","ottieni","migliora","raddoppia","triplica",
+  "sblocca","porta","genera","crea","trasforma","velocizza","semplifica"
+];
+const MEASURABLE_HINTS = [
+  "giorni","settimane","mesi","ore","€","euro","percento","%","clienti","contatti","appuntamenti","vendite"
+];
+
+// Decide if phrase is more "conversazionale" (qualificazione/frame) vs "promessa"
+// NON per cambiare punteggio, ma per dare feedback corretto.
+function classifyPhrase(t){
+  const s = normalizeText(t);
+  if(!s) return "empty";
+  const convoSignals = ["vediamo","valutiamo","capisco","capire","comprendo","scopriamo","guidiamo","parliamo","confrontiamo","esploriamo"];
+  const hasNumber = /\d/.test(s);
+  const hasValueVerb = VALUE_VERBS.some(v => s.includes(v));
+  const hasConvo = convoSignals.some(v => s.includes(v));
+  if(hasConvo && !hasNumber && !hasValueVerb) return "conversazionale";
+  if(hasValueVerb || hasNumber) return "promessa";
+  return "mista";
+}
+
+function scoreRilevanza(t){
+  const s = normalizeText(t);
+  if(!s) return 0;
+  const hit = TARGET_TRIGGERS.some(k => s.includes(k));
+  if(hit) return 2;
+
+  // Indizi secondari: uso di "tu/lei/voi" senza formula esplicita
+  const hasDirectPronoun = /\b(tu|te|ti|lei|la|le|voi|vi)\b/.test(s);
+  if(hasDirectPronoun) return 1;
+  return 0;
+}
+
+function scoreNovita(t){
+  const s = normalizeText(t);
+  if(!s) return 0;
+  const hit = NOVELTY_TRIGGERS.some(k => s.includes(k));
+  if(hit) return 2;
+
+  // 1/2 se c'è un micro-contrasto soft (ma non keyword esplicita)
+  const hasBut = /\b(ma|però|tuttavia)\b/.test(s);
+  if(hasBut) return 1;
+  return 0;
+}
+
+function scoreSemplicita(t){
+  const wc = wordCountOf(t);
+  if(wc === 0) return 0;
+  if(wc <= 10) return 2;
+  if(wc <= 14) return 1;
+  return 0;
+}
+
+function scoreValore(t){
+  const s = normalizeText(t);
+  if(!s) return 0;
+
+  // Per frasi conversazionali (qualificazione): il "valore" può essere frame/guida,
+  // ma NON è misurabile. Non penalizziamo come "0" automaticamente.
+  const type = classifyPhrase(t);
+
+  const hasValueVerb = VALUE_VERBS.some(v => s.includes(v));
+  const hasMeasurable = /\d/.test(s) || MEASURABLE_HINTS.some(h => s.includes(h));
+
+  if(hasValueVerb && hasMeasurable) return 2;
+  if(hasValueVerb || hasMeasurable) return 1;
+
+  // Conversazionale: 1/2 se contiene guida/valutazione (valore di frame)
+  if(type === "conversazionale"){
+    const frameVerbs = ["vediamo","valutiamo","guidiamo","scopriamo","esploriamo","capisco","comprendo"];
+    if(frameVerbs.some(v => s.includes(v))) return 1;
+  }
+  return 0;
+}
+
+/* =========================================================
+   2) Linguaggio – Negative → Positive (dal PDF)
+   IMPORTANT: Solo sostituzioni ammesse, zero invenzioni.
+========================================================= */
+
+// Map principale (case-insensitive). Le chiavi sono "forme base".
+// Sostituzioni: scegliamo la prima suggerita.
+const NEG2POS = {
+  // SEZIONE 1 – APERTURA
+  "imparare": ["scoprire"],
+  "spiegare": ["guidare"],
+  "provare": ["sperimentare"],
+  "capire": ["scoprire", "comprendere"],
+  "ascoltare": ["esplorare", "ascoltarsi", "ascoltandoci"],
+  "guardare": ["osservare", "valutare", "scoprire"],
+  "sentire": ["percepire"],
+  "leggere": ["consultare", "sfogliare"],
+  "studiare": ["approfondire", "esplorare"],
+  "aspettare": ["prepararsi", "anticipare"],
+  "problema": ["situazione", "punto critico", "contesto"],
+
+
+  // SEZIONE 2 – VALORE
+  "costoso": ["investimento"],
+  "prezzo": ["valore", "contributo", "risultato", "beneficio", "risultato misurabile"],
+  "spesa": ["allocazione", "investimento", "risorsa", "capitalizzazione", "allocazione intelligente"],
+  "caro": ["esclusivo", "premium", "strategico", "selezionato", "premium accessibile"],
+  "costo": ["opportunità", "valore concentrato", "vantaggio", "ritorno"],
+
+  // SEZIONE 3 – DECISIONE
+  "devi": ["puoi"],
+  "dovresti": ["potresti"],
+  "bisogna": ["vale la pena"],
+  "comprare": ["iniziare"],
+  "firmare": ["confermare", "validare", "approvare"],
+  "scegliere": ["selezionare"],
+  "obbligo": ["opportunità", "scelta consapevole"],
+  "decisione": ["scelta"],
+  "impegno": ["coinvolgimento", "passo"],
+  "dovere": ["desiderare", "preferenza"],
+  "necessario": ["vantaggioso", "desiderabile"],
+  "forzare": ["facilitare", "attrarre"],
+  "vincere": ["ottenere"],
+  "perdere": ["trasformare"],
+  "decidere": ["valutare"],
+  // (note: "decida" / "decidere" etc gestiti sotto con regole flessive)
+
+  // SEZIONE 4 – CONNESSIONE (gerundi ecc)
+  "capendo": ["comprendo"],
+  "pensando": ["valutando", "riflettendo", "immaginando"],
+  "cercando": ["esplorando"],
+  "parlando": ["condividendo", "dialogando"],
+  "ascoltando": ["recependo", "ascoltandoci"],
+  "leggendo": ["consultando", "approfondendo"],
+  "scrivendo": ["annotando", "redigendo"],
+  "aspettando": ["preparando", "anticipando"],
+  "confrontando": ["confrontandomi"],
+
+  // SEZIONE 5 – CHIUSURA
+  "chiudere": ["finalizzare"],
+  "terminare": ["completare", "avviare", "concretizzare", "perfezionare"],
+  "concludere": ["avviare", "formalizzare"],
+  "finire": ["iniziare", "realizzare", "celebrare"],
+  "procedere": ["procedere"], // no-op (utile per non segnare come negativo)
+  "finalizzare": ["finalizzare"] // no-op
+};
+
+// Alcune forme verbali frequenti da gestire senza “invenzioni”.
+// Regola: sostituzione semplice con regex su parola intera.
+// NB: Non è un lemmatizzatore perfetto, ma è stabile e conservativo.
+const FLEX_RULES = [
+  // devi/dovresti/bisogna già gestiti come parole intere
+  { re: /\bdecida\b/gi, to: "valuti" },
+  { re: /\bdecidi\b/gi, to: "valuta" },
+  { re: /\bdecidere\b/gi, to: "valutare" },
+  { re: /\bdecido\b/gi, to: "valuto" },
+  { re: /\bdecidiamo\b/gi, to: "valutiamo" },
+
+  { re: /\bfirmi\b/gi, to: "confermi" },
+  { re: /\bfirma\b/gi, to: "conferma" },
+  { re: /\bfirmare\b/gi, to: "confermare" },
+
+  { re: /\bchiudiamo\b/gi, to: "finalizziamo" },
+  { re: /\bchiudi\b/gi, to: "finalizza" },
+  { re: /\bchiudo\b/gi, to: "finalizzo" },
+  { re: /\bchiudere\b/gi, to: "finalizzare" },
+
+  { re: /\bterminiamo\b/gi, to: "completiamo" },
+  { re: /\btermina\b/gi, to: "completa" },
+  { re: /\bterminare\b/gi, to: "completare" },
+
+  { re: /\bconcludiamo\b/gi, to: "formalizziamo" },
+  { re: /\bconcludere\b/gi, to: "formalizzare" },
+
+  { re: /\bfinisci\b/gi, to: "inizia" },
+  { re: /\bfiniamo\b/gi, to: "iniziamo" },
+  { re: /\bfinire\b/gi, to: "iniziare" }
+];
+
+function findNegWords(t){
+  const s = normalizeText(t);
+  if(!s) return [];
+  const found = [];
+
+  // parole base (chiave intera)
+  Object.keys(NEG2POS).forEach(k => {
+    // salta no-op
+    const isNoOp = (NEG2POS[k].length === 1 && NEG2POS[k][0] === k);
+    if(isNoOp) return;
+
+    const re = new RegExp(`\\b${k}\\b`, "i");
+    if(re.test(s)) found.push(k);
+  });
+
+  // anche se non trova la base, alcune flessioni vengono segnalate via rules (soft)
+  // (es: "decida", "chiudiamo")
+  FLEX_RULES.forEach(rule => {
+    if(rule.re.test(t)) found.push(rule.re.source.replace(/\\b|\\\w\+/g,'').replace(/[^\wàèìòù]+/g,'').trim() || "forma verbale");
+  });
+
+  // normalizza e unique
+  return [...new Set(found.filter(Boolean))];
+}
+
+function buildReplacementList(t){
+  const s = normalizeText(t);
+  if(!s) return [];
+  const items = [];
+
+  // basi
+  for(const neg of Object.keys(NEG2POS)){
+    const isNoOp = (NEG2POS[neg].length === 1 && NEG2POS[neg][0] === neg);
+    if(isNoOp) continue;
+
+    const re = new RegExp(`\\b${neg}\\b`, "i");
+    if(re.test(s)){
+      items.push({neg, pos: NEG2POS[neg]});
+    }
+  }
+
+  // unique by neg
+  const seen = new Set();
+  return items.filter(it => {
+    if(seen.has(it.neg)) return false;
+    seen.add(it.neg);
+    return true;
+  });
+}
+
+function conservativeRewrite(original){
+  let out = original;
+
+  // 1) Applica regole flessive (più specifiche)
+  FLEX_RULES.forEach(rule => {
+    out = out.replace(rule.re, match => {
+      // Mantieni maiuscola iniziale se match era Maiuscolo
+      const isCap = match && match[0] === match[0].toUpperCase();
+      const rep = rule.to;
+      return isCap ? rep.charAt(0).toUpperCase() + rep.slice(1) : rep;
+    });
+  });
+
+  // 2) Applica sostituzioni base su parole intere (prima scelta)
+  for(const neg of Object.keys(NEG2POS)){
+    const isNoOp = (NEG2POS[neg].length === 1 && NEG2POS[neg][0] === neg);
+    if(isNoOp) continue;
+
+    const pos = NEG2POS[neg][0]; // prima proposta = default
+    const re = new RegExp(`\\b${neg}\\b`, "gi");
+    out = out.replace(re, match => {
+      const isCap = match && match[0] === match[0].toUpperCase();
+      return isCap ? pos.charAt(0).toUpperCase() + pos.slice(1) : pos;
+    });
+  }
+
+  // 3) Pulizia spazi (non cambia significato)
+  out = out.replace(/\s+/g," ").replace(/\s([,.;:!?])/g,"$1").trim();
+  return out;
+}
+
+/* =========================================================
+   3) Feedback dinamico (non inventa)
+========================================================= */
+function levelFromTotal(total){
+  if(total >= 7) return {label:"ECCELLENTE", cls:"good"};
+  if(total >= 5) return {label:"BUONA", cls:"warn"};
+  return {label:"DA MIGLIORARE", cls:"bad"};
+}
+
+function setHint(scores, wc, type){
+  const el = document.getElementById("brutalHint");
+
+  // trova parametro più basso
+  const entries = [
+    {k:"rilevanza", label:"Target", v:scores.rilevanza},
+    {k:"novita", label:"Novità", v:scores.novita},
+    {k:"semplicita", label:"Semplicità", v:scores.semplicita},
+    {k:"valore", label:"Valore", v:scores.valore},
+  ].sort((a,b)=>a.v-b.v);
+
+  const worst = entries[0];
+
+  const hints = {
+    rilevanza: `<b>Stai parlando “nel vuoto”.</b> Se è una frase da closer, aggiungi un riferimento alla persona: “per chi… / se sei… / per te che…”.`,
+    novita: `<b>È troppo generica.</b> Non invento ganci: ti segnalo solo che manca un elemento differenziante (se vuoi, aggiungilo tu).`,
+    semplicita: `<b>È lunga (${wc} parole).</b> Taglia fino a 8–10 parole. Una frase. Un colpo.`,
+    valore: (type === "conversazionale")
+      ? `<b>È una frase conversazionale.</b> Va bene che non prometta risultati. Se vuoi renderla più forte, rendila più diretta e “high-status” senza inventare contenuti.`
+      : `<b>Non emerge un beneficio chiaro.</b> Non invento risultati: se vuoi “valore”, devi inserirlo tu nella frase (numero/tempo/beneficio).`,
+  };
+
+  el.innerHTML = hints[worst.k];
+}
+
+/* =========================================================
+   4) Render UI
+========================================================= */
+function renderSections(scores, phrase){
+  const container = document.getElementById("sections");
+  const wc = wordCountOf(phrase);
+  const type = classifyPhrase(phrase);
+
+  const cards = [
+    {
+      title: "🎯 Target (Rilevanza)",
+      key: "rilevanza",
+      score: scores.rilevanza,
+      bullets: [
+        "Stai parlando a una persona specifica (non a tutti).",
+        "Se manca, aggiungi: “per chi…”, “se sei…”, “per te che…”.",
+        "Evita frasi neutre: non sono per nessuno."
+      ]
+    },
+    {
+      title: "💡 Novità (Differenziazione)",
+      key: "novita",
+      score: scores.novita,
+      bullets: [
+        "C’è un elemento distintivo o un contrasto (es. “senza…”, “diverso…”, “unico…”).",
+        "Se manca, non lo invento: ti segnalo che serve una differenza reale.",
+        "La novità deve essere credibile, non hype."
+      ]
+    },
+    {
+      title: "✂️ Semplicità (Brevità)",
+      key: "semplicita",
+      score: scores.semplicita,
+      bullets: [
+        `Obiettivo: 8–10 parole (tu sei a ${wc}).`,
+        "Taglia parole inutili, giri lunghi, avverbi.",
+        "Una frase = un colpo."
+      ]
+    },
+    {
+      title: "💰 Valore (Beneficio / Direzione)",
+      key: "valore",
+      score: scores.valore,
+      bullets: (type === "conversazionale")
+        ? [
+            "Frase conversazionale: il valore può essere frame, guida, qualificazione.",
+            "Non serve promettere numeri se non è quello il momento della call.",
+            "Rendila più diretta, più pulita, più autorevole."
+          ]
+        : [
+            "Il lettore deve capire cosa guadagna (beneficio).",
+            "Se vuoi 2/2: verbo d’azione + qualcosa di misurabile (tempo/numero).",
+            "Non invento benefici: devono essere già presenti nella frase."
+          ]
+    }
+  ];
+
+  container.innerHTML = cards.map(c => `
+    <div class="section">
+      <div class="sectionHead">
+        <b>${escapeHtml(c.title)}</b>
+        <span class="chip">${c.score}/2</span>
+      </div>
+      <div class="muted2" style="font-size:13px">
+        ${type !== "empty" ? (type === "conversazionale"
+          ? "Modalità: vendita conversazionale (closer)."
+          : (type === "promessa" ? "Modalità: promessa/beneficio (marketing/proposta)." : "Modalità: mista.")) : ""}
+      </div>
+      <ul>
+        ${c.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}
+      </ul>
+    </div>
+  `).join("");
+}
+
+function renderLanguage(phrase){
+  const neg = findNegWords(phrase);
+  const list = buildReplacementList(phrase);
+  const rewritten = conservativeRewrite(phrase);
+
+  const langChip = document.getElementById("langChip");
+  const langKpis = document.getElementById("langKpis");
+  const negFound = document.getElementById("negFound");
+  const replacements = document.getElementById("replacements");
+  const rewrittenBox = document.getElementById("rewritten");
+
+  const count = list.length;
+  langChip.textContent = count === 0 ? "Pulito" : `${count} sostituzioni`;
+
+  langKpis.innerHTML = `
+    <span class="kpi">Tipo frase: ${escapeHtml(classifyPhrase(phrase))}</span>
+    <span class="kpi">Parole negative trovate: ${neg.length}</span>
+    <span class="kpi">Sostituzioni applicabili: ${count}</span>
+  `;
+
+  negFound.textContent = neg.length ? neg.join(", ") : "Nessuna parola negativa rilevata.";
+
+  if(list.length){
+    replacements.innerHTML = list.map(it => {
+      const pos = it.pos.join(" / ");
+      return `• ${it.neg} → ${pos}`;
+    }).join("\n");
+  } else {
+    replacements.textContent = "Nessuna sostituzione necessaria.";
+  }
+
+  // Se rewriting non cambia nulla, lo dichiariamo
+  if(!phrase.trim()){
+    rewrittenBox.textContent = "—";
+  } else if(rewritten.trim() === phrase.trim()){
+    rewrittenBox.textContent = rewritten + "\n\n(Non ho cambiato nulla: non c’erano parole da sostituire.)";
+  } else {
+    rewrittenBox.textContent = rewritten;
+  }
+
+  // Salva per copia
+  rewrittenBox.dataset.copy = rewritten;
+}
+
+function renderOverall(total){
+  const level = levelFromTotal(total);
+  document.getElementById("totalScore").textContent = isFinite(total) ? String(total) : "–";
+  const badge = document.getElementById("levelBadge");
+  badge.className = `badge ${level.cls}`;
+  badge.textContent = level.label;
+
+  const pct = clamp((total/8)*100, 0, 100);
+  document.getElementById("scoreBar").style.width = pct + "%";
+}
+
+function analyze(){
+  const phrase = document.getElementById("phrase").value;
+
+  setPills();
+
+  if(!phrase.trim()){
+    renderOverall(NaN);
+    document.getElementById("levelBadge").className = "badge";
+    document.getElementById("levelBadge").textContent = "Inserisci una frase";
+    document.getElementById("sections").innerHTML = "";
+    document.getElementById("negFound").textContent = "—";
+    document.getElementById("replacements").textContent = "—";
+    document.getElementById("rewritten").textContent = "—";
+    document.getElementById("langChip").textContent = "—";
+    document.getElementById("langKpis").innerHTML = "";
+    document.getElementById("brutalHint").innerHTML = "<b>Non invento concetti.</b> Ripulisco e riformulo solo ciò che hai scritto.";
+    return;
+  }
+
+  const scores = {
+    rilevanza: scoreRilevanza(phrase),
+    novita: scoreNovita(phrase),
+    semplicita: scoreSemplicita(phrase),
+    valore: scoreValore(phrase)
+  };
+  const total = scores.rilevanza + scores.novita + scores.semplicita + scores.valore;
+
+  renderOverall(total);
+  renderSections(scores, phrase);
+  renderLanguage(phrase);
+
+  const wc = wordCountOf(phrase);
+  const type = classifyPhrase(phrase);
+  setHint(scores, wc, type);
+}
+
+/* =========================================================
+   5) Events
+========================================================= */
+document.getElementById("phrase").addEventListener("input", setPills);
+document.getElementById("analyzeBtn").addEventListener("click", analyze);
+
+document.getElementById("exampleBtn").addEventListener("click", () => {
+  const ex = "Vediamo se questo è il percorso più adatto a te.";
+  document.getElementById("phrase").value = ex;
+  setPills();
+  analyze();
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  document.getElementById("phrase").value = "";
+  setPills();
+  analyze();
+});
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  const t = document.getElementById("rewritten").dataset.copy || "";
+  if(!t.trim()) return;
+  try{
+    await navigator.clipboard.writeText(t);
+    const btn = document.getElementById("copyBtn");
+    const old = btn.textContent;
+    btn.textContent = "Copiato ✅";
+    setTimeout(()=>btn.textContent = old, 900);
+  }catch(e){
+    alert("Copia non riuscita. Seleziona e copia manualmente.");
+  }
+});
+
+document.getElementById("whyLink").addEventListener("click", () => {
+  const box = document.getElementById("whyBox");
+  box.style.display = (box.style.display === "none") ? "block" : "none";
+});
+
+// init
+setPills();
+analyze();
+</script>
+</body>
+</html>
